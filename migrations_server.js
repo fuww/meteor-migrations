@@ -39,6 +39,8 @@ Migrations = {
     logger: null,
     // enable/disable info log "already at latest."
     logIfLatest: true,
+    // enable/disable error when control is locked
+    failOnLocked: false,
     // migrations collection name
     collectionName: 'migrations',
   },
@@ -160,7 +162,12 @@ Migrations._migrateTo = function(version, rerun) {
   var currentVersion = control.version;
 
   if (lock() === false) {
+    if (Migrations.options.failOnLocked) {
+      throw new Error('Not migrating, control is locked.');
+    }
+
     log.info('Not migrating, control is locked.');
+
     return;
   }
 

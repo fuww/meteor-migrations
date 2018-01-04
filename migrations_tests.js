@@ -178,6 +178,26 @@ Tinytest.add('Checks that locking works correctly', function(test) {
   test.equal(Migrations.getVersion(), 1);
 });
 
+Tinytest.addAsync('Checks that failOnLocked works', function(test, done) {
+  Migrations._reset();
+  Migrations.config({failOnLocked: true});
+
+  // add the migrations
+  Migrations.add({
+    version: 1,
+    up: function() {
+      test.throws(function() {
+        Migrations.migrateTo('latest');
+      }, 'Not migrating, control is locked.');
+
+      done();
+    },
+  });
+
+  // migrates up, should only migrate once
+  Migrations.migrateTo('latest');
+});
+
 Tinytest.add('Does nothing for no migrations.', function(test) {
   Migrations._reset();
 
